@@ -1,6 +1,6 @@
 import pygame
-from board import board
-from game import game
+from board import Board
+from game import Game
 
 def draw(screen, board):
         board.draw(screen)
@@ -16,9 +16,9 @@ def main():
 
     board_size = 8
     tile_width, tile_height = width // board_size, height // board_size
-    board = board(tile_width, tile_height, board_size)
+    board = Board(tile_width, tile_height, board_size)
 
-    game = game()
+    game = Game()
     FPS = pygame.time.Clock()
 
     running = True
