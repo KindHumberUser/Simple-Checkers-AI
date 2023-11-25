@@ -49,10 +49,12 @@ class Board:
 
     def handle_click(self, pos):
         x, y = pos[0], pos[-1]
+
         #Get the tile position from pixel coords
         if x >= self.board_size or y >= self.board_size:
             x = x // self.tile_width
             y = y // self.tile_height
+
         clicked_tile = self.get_tile_from_pos((x, y))
 
         #If piece is not selected, check if a piece exists on tile and select it

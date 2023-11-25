@@ -20,7 +20,7 @@ def main():
 
     game = Game()
     FPS = pygame.time.Clock()
-
+    counter = 0
     running = True
     while(running):
           game.check_jump(board)
@@ -29,15 +29,18 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-                if not game.is_game_over(board):
-                    if event.type == pygame.MOUSEBUTTONDOWN:
+            if not game.is_game_over(board):
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
                         board.handle_click(event.pos)
-                else:
-                    game.message()
-                    running = False
+                        
+            else:
+                game.message()
+                running = False
 
             draw(screen, board)
             FPS.tick(60)
+            counter += 1
 
 if __name__ == "__main__":
     main()
