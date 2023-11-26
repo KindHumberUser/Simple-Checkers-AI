@@ -23,9 +23,9 @@ def main():
     counter = 0
     running = True
     while(running):
-          game.check_jump(board)
-          
-          for event in pygame.event.get():
+        game.check_jump(board)
+        
+        for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
