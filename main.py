@@ -149,10 +149,19 @@ def game_loop(screen, difficulty, ai_color, user_color):
                     print("AI move completed")
             else:
                 game.message()
+                restart()
                 running = False
 
             draw(screen, board)
             FPS.tick(60)
+
+def restart(screen):
+    difficulty = input("What difficulty do you want to play on? Choose from beginner, intermediate and advanced. \n")
+    user_color = input("What color do you want to start with? Choose from red or black. \n")
+
+    ai_color = 'red' if user_color=="black" else 'black'
+
+    game_loop(screen, difficulty, ai_color, user_color)
 
 
 # def end_screen(screen, winner):

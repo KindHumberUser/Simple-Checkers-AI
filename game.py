@@ -42,9 +42,9 @@ class Game:
                     break
                 else:
                     board.is_jump = False
-        if board.is_jump:
-            board.selected_piece = piece
-            board.handle_click(piece.pos)
+        # if board.is_jump:
+        #     board.selected_piece = piece
+        #     board.handle_click(piece.pos)
         return board.is_jump
     
     def message(self):
