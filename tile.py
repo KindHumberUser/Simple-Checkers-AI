@@ -38,3 +38,6 @@ class Tile:
             centering_rect = self.occupying_piece.img.get_rect()
             centering_rect.center = self.rect.center
             display.blit(self.occupying_piece.img, centering_rect.topleft)
+
+    def return_pos(self):
+        return self.pos
