@@ -8,8 +8,8 @@ from ai_player import AIPlayer
 WIDTH, HEIGHT = 640, 640
 FPS = pygame.time.Clock()
 AI_DIFFICULTY = "beginner"
-AI_COLOR = "black"
-USER_COLOR = "red"
+AI_COLOR = "red"
+USER_COLOR = "black"
 
 
 def draw(screen, board):
@@ -113,6 +113,7 @@ def third_screen(screen):
 
 
 def set_turn(col, screen):
+    print(f"Entering set_turn with col={col}")
     if col == 0:
         AI_COLOR = "black"
         USER_COLOR = "red"
@@ -124,6 +125,7 @@ def set_turn(col, screen):
 
 
 def game_loop(screen):
+    print("Entering game_loop")
     board_size = 8
     tile_width, tile_height = WIDTH // board_size, HEIGHT // board_size
     board = Board(tile_width, tile_height, board_size)
@@ -142,9 +144,11 @@ def game_loop(screen):
                         if event.button == 1:
                             board.handle_click(event.pos)
                 else:
+                    print("AI's turn")
                     ai_piece, ai_tile = opp.select_move(board)
+                    print(f"AI selected piece {ai_piece} to move to {ai_tile}")
                     board.handle_move(ai_piece, ai_tile)
-
+                    print("AI move completed")
             else:
                 end_screen(screen, game.winner())
 
@@ -153,6 +157,7 @@ def game_loop(screen):
 
 
 def end_screen(screen, winner):
+    print(f"Entering end_screen with winner={winner}")
     retry_button = Button(220, 270, 200, 50, "images/retry.png", title_screen, screen)
     quit_button = Button(220, 420, 200, 50, "images/quit.png", sys.exit)
 
@@ -191,8 +196,8 @@ def main():
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Simple Checkers Game")
 
-    title_screen(screen)
-
+    # title_screen(screen)
+    game_loop(screen)
 
 if __name__ == "__main__":
     main()

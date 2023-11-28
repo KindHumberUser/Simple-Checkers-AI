@@ -89,20 +89,15 @@ class Board:
         self.selected_piece = piece
         move_tile = tile
 
-        running = True
-
-        while running:
-            if self.selected_piece.move(move_tile):
-                if not self.is_jump:
+        if self.selected_piece.move(move_tile):
+            if not self.is_jump:
+                self.turn = 'red' if self.turn == 'black' else 'black'
+                running = False
+            else:
+                # Checks if additional followup jumps can be made before ending turn
+                if len(tile.occupying_piece.valid_jumps()) == 0:
                     self.turn = 'red' if self.turn == 'black' else 'black'
                     running = False
-                else:
-                    # Checks if additional followup jumps can be made before ending turn
-                    if len(tile.occupying_piece.valid_jumps()) == 0:
-                        self.turn = 'red' if self.turn == 'black' else 'black'
-                        running = False
-                    else:
-                        move_tile = move_tile.occupying_piece.valid_jumps().pop(0)
 
     def draw(self, display):
         # Highlights selected piece

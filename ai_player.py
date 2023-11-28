@@ -15,13 +15,13 @@ class AIPlayer:
 
     def select_move_beginner(self, board):
         # Select a random valid move
+        print("Running beginner")
         moves = self.get_all_valid_moves(board)
         return random.choice(moves) if moves else None
 
     def select_move_intermediate(self, board):
+        print("Running intermediate")
         moves = self.get_all_valid_moves(board)
-        if not moves:
-            return None
 
         # Prioritize capturing moves
         capturing_moves = [move for move in moves if self.is_capturing_move(move)]
@@ -52,7 +52,8 @@ class AIPlayer:
         return best_move
 
     def minimax(self, move, board, depth, is_maximizing, alpha, beta):
-        if depth == 0 or board.is_game_over():
+        print(f"Running minimax: Depth {depth}, Is Maximizing: {is_maximizing}, Alpha: {alpha}, Beta: {beta}")
+        if depth == 0:
             return self.evaluate_board(board)
 
         if is_maximizing:
