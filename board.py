@@ -2,6 +2,7 @@ import pygame
 from tile import Tile
 from pawn import Pawn
 
+
 class Board:
     def __init__(self, tile_width, tile_height, board_size):
         self.tile_width = tile_width
@@ -30,15 +31,20 @@ class Board:
         for y in range(self.board_size):
             for x in range(self.board_size):
                 output.append(
-                    Tile(x,  y, self.tile_width, self.tile_height)
+                    Tile(x, y, self.tile_width, self.tile_height)
                 )
         return output
-    
+
     def get_tile_from_pos(self, pos):
         for tile in self.tile_list:
             if (tile.x, tile.y) == (pos[0], pos[1]):
                 return tile
-            
+
+    def get_tile_from_piece(self, piece):
+        for tile in self.tile_list:
+            if tile.occupying_piece == piece:
+                return tile
+
     def setup(self):
         for y_ind, row in enumerate(self.config):
             for x_ind, x in enumerate(row):
@@ -50,38 +56,59 @@ class Board:
     def handle_click(self, pos):
         x, y = pos[0], pos[-1]
 
-        #Get the tile position from pixel coords
+        # Get the tile position from pixel coords
         if x >= self.board_size or y >= self.board_size:
             x = x // self.tile_width
             y = y // self.tile_height
 
         clicked_tile = self.get_tile_from_pos((x, y))
 
-        #If piece is not selected, check if a piece exists on tile and select it
+        # If piece is not selected, check if a piece exists on tile and select it
         if self.selected_piece is None:
             if clicked_tile.occupying_piece is not None:
-                #Check the clicked tile color belongs to player with current turn
+                # Check the clicked tile color belongs to player with current turn
                 if clicked_tile.occupying_piece.color == self.turn:
                     self.selected_piece = clicked_tile.occupying_piece
-        #Checks if selected piece can move to current tile
+        # Checks if selected piece can move to current tile
         elif self.selected_piece.move(clicked_tile):
-            #If not a jump then ends turn
+            # If not a jump then ends turn
             if not self.is_jump:
                 self.turn = 'red' if self.turn == 'black' else 'black'
             else:
-                #Checks if additional followup jumps can be made before ending turn
+                # Checks if additional followup jumps can be made before ending turn
                 if len(clicked_tile.occupying_piece.valid_jumps()) == 0:
                     self.turn = 'red' if self.turn == 'black' else 'black'
-        #Selects piece if it belongs to color of current player
+        # Selects piece if it belongs to color of current player
         elif clicked_tile.occupying_piece is not None:
             if clicked_tile.occupying_piece.color == self.turn:
                 self.selected_piece = clicked_tile.occupying_piece
 
+    def handle_move(self, piece, tile):
+        selected_tile = self.get_tile_from_piece(piece)
+        selected_tile.highlight = True
+        self.selected_piece = piece
+        move_tile = tile
+
+        running = True
+
+        while running:
+            if self.selected_piece.move(move_tile):
+                if not self.is_jump:
+                    self.turn = 'red' if self.turn == 'black' else 'black'
+                    running = False
+                else:
+                    # Checks if additional followup jumps can be made before ending turn
+                    if len(tile.occupying_piece.valid_jumps()) == 0:
+                        self.turn = 'red' if self.turn == 'black' else 'black'
+                        running = False
+                    else:
+                        move_tile = move_tile.occupying_piece.valid_jumps().pop(0)
+
     def draw(self, display):
-        #Highlights selected piece
+        # Highlights selected piece
         if self.selected_piece is not None:
             self.get_tile_from_pos(self.selected_piece.pos).highlight = True
-            #Highlights moves or jumps
+            # Highlights moves or jumps
             if not self.is_jump:
                 for tile in self.selected_piece.valid_moves():
                     tile.highlight = True
@@ -89,6 +116,9 @@ class Board:
                 for tile in self.selected_piece.valid_jumps():
                     tile[0].highlight = True
 
-        #Draws every tile to display
+        # Draws every tile to display
         for tile in self.tile_list:
             tile.draw(display)
+
+    def get_turn(self):
+        return self.turn

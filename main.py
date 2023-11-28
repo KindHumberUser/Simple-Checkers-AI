@@ -3,9 +3,13 @@ import sys
 from board import Board
 from game import Game
 from button import Button
+from ai_player import AIPlayer
 
 WIDTH, HEIGHT = 640, 640
 FPS = pygame.time.Clock()
+AI_DIFFICULTY = "beginner"
+AI_COLOR = "black"
+USER_COLOR = "red"
 
 
 def draw(screen, board):
@@ -68,14 +72,21 @@ def second_screen(screen):
 
 
 def set_diff(diff, screen):
+    if diff == 0:
+        AI_DIFFICULTY = "beginner"
+    elif diff == 1:
+        AI_DIFFICULTY = "intermediate"
+    else:
+        AI_DIFFICULTY = "advanced"
+
     third_screen(screen)
 
     return None
 
 
 def third_screen(screen):
-    red_side = Button(220, 270, 200, 50, "images/red.png", game_loop, screen)
-    black_side = Button(220, 420, 200, 50, "images/black.png", game_loop, screen)
+    red_side = Button(220, 270, 200, 50, "images/red.png", set_turn, (0, screen))
+    black_side = Button(220, 420, 200, 50, "images/black.png", set_turn, (1, screen))
 
     buttons = [red_side, black_side]
 
@@ -101,11 +112,22 @@ def third_screen(screen):
         FPS.tick(60)
 
 
+def set_turn(col, screen):
+    if col == 0:
+        AI_COLOR = "black"
+        USER_COLOR = "red"
+    else:
+        AI_COLOR = "red"
+        USER_COLOR = "black"
+
+    game_loop(screen)
+
+
 def game_loop(screen):
     board_size = 8
     tile_width, tile_height = WIDTH // board_size, HEIGHT // board_size
     board = Board(tile_width, tile_height, board_size)
-
+    opp = AIPlayer(AI_DIFFICULTY, AI_COLOR)
     game = Game()
     while True:
         game.check_jump(board)
@@ -115,9 +137,13 @@ def game_loop(screen):
                 running = False
 
             if not game.is_game_over(board):
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 1:
-                        board.handle_click(event.pos)
+                if board.get_turn() == USER_COLOR:
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if event.button == 1:
+                            board.handle_click(event.pos)
+                else:
+                    ai_piece, ai_tile = opp.select_move(board)
+                    board.handle_move(ai_piece, ai_tile)
 
             else:
                 end_screen(screen, game.winner())
@@ -132,10 +158,10 @@ def end_screen(screen, winner):
 
     buttons = [retry_button, quit_button]
 
-    if winner == "red":
-        back_img = "images/red_wins.png"
+    if winner == USER_COLOR:
+        back_img = "images/game_win.png"
     else:
-        back_img = "images/black_wins.png"
+        back_img = "images/game_lose.png"
 
     for button in buttons:
         button.change_background(back_img)
