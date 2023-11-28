@@ -144,12 +144,12 @@ def game_loop(screen, difficulty, ai_color, user_color):
                 else:
                     print("AI's turn")
                     ai_piece, ai_tile = opp.select_move(board)
-                    print(f"AI selected piece {ai_piece} to move to {ai_tile}")
+                    print(f"AI selected piece {ai_piece.pos} to move to {ai_tile.pos}")
                     board.handle_move(ai_piece, ai_tile)
                     print("AI move completed")
             else:
                 game.message()
-                restart()
+                restart(screen)
                 running = False
 
             draw(screen, board)

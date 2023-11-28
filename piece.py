@@ -1,5 +1,7 @@
 import pygame
 
+from tile import Tile
+
 class Piece:
 
     def __init__(self, x, y, color, board):
@@ -23,6 +25,8 @@ class Piece:
             prev_tile = self.board.get_tile_from_pos(self.pos)
             self.pos, self.x, self.y = tile.pos, tile.x, tile.y
             prev_tile.occupying_piece = None
+            prev_tile.highlight = True
+            tile.highlight = True
             tile.occupying_piece = self
             self.board.selected_piece = None
             self.has_moved = True
@@ -55,6 +59,11 @@ class Piece:
                             )
                     return True
         else:
+            print("Trying to make invalid move")
+            print(self.pos)
+            
+            print(tile.pos)
+            
             self.board.selected_piece = None
             return False
         

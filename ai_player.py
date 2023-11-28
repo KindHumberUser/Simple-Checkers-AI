@@ -41,13 +41,22 @@ class AIPlayer:
         best_move = None
         alpha = float('-inf')
         beta = float('inf')
-        depth = 3  # Depth can be adjusted for difficulty
+        depth = 4  # Depth can be adjusted for difficulty
 
-        for move in self.get_all_valid_moves(board):
+        valid_moves = self.get_all_valid_moves(board)
+        capturing_moves = [move for move in valid_moves if self.is_capturing_move(move)]
+
+        if capturing_moves:
+            valid_moves = capturing_moves
+
+        for move in valid_moves:
             score = self.minimax(move, board, depth, False, alpha, beta)
             if score > best_score:
                 best_score = score
                 best_move = move
+
+        if capturing_moves:
+            print("Forced")
 
         return best_move
 
@@ -93,11 +102,20 @@ class AIPlayer:
 
     def get_all_valid_moves(self, board):
         valid_moves = []
-        for tile in board.tile_list:
-            piece = tile.occupying_piece
-            if piece and piece.color == self.color:
-                for move in piece.valid_moves():
-                    valid_moves.append((piece, move))
-                for jump in piece.valid_jumps():
-                    valid_moves.append((piece, jump[0]))
+        if (board.is_jump):
+            for tile in board.tile_list:
+                if tile.occupying_piece != None:
+                    piece = tile.occupying_piece
+                    if piece.color == self.color:
+                        for jump in piece.valid_jumps():
+                            valid_moves.append((piece, jump[0]))
+        else:
+            for tile in board.tile_list:
+                piece = tile.occupying_piece
+                if piece and piece.color == self.color:
+                    for move in piece.valid_moves():
+                        valid_moves.append((piece, move))
+                    for jump in piece.valid_jumps():
+                        valid_moves.append((piece, jump[0]))
+        
         return valid_moves

@@ -97,7 +97,7 @@ class Board:
                 # Checks if additional followup jumps can be made before ending turn
                 if len(tile.occupying_piece.valid_jumps()) == 0:
                     self.turn = 'red' if self.turn == 'black' else 'black'
-                    running = False
+
 
     def draw(self, display):
         # Highlights selected piece
