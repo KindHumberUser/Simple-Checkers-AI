@@ -4,8 +4,10 @@ class AIPlayer:
     def __init__(self, difficulty, color):
         self.difficulty = difficulty
         self.color = color
+        self.numMoves = 0
 
     def select_move(self, board):
+        self.numMoves += 1
         if self.difficulty == 'beginner':
             return self.select_move_beginner(board)
         elif self.difficulty == 'intermediate':
@@ -85,72 +87,79 @@ class AIPlayer:
 
     def evaluate_board(self, board):
         score = 0
-
-        # Evaluate piece values and positions
+        ops = []
+        mine = []
+        #Get a list of opponent and self pieces
         for tile in board.tile_list:
             piece = tile.occupying_piece
             if piece:
-                piece_value = 2 if piece.notation == 'k' else 1
-                if piece.color == self.color:
-                    score += piece_value
+                if piece.color!=self.color:
+                    ops.append(piece)
                 else:
-                    score -= piece_value
+                    mine.append(piece)
 
-                # Add positional evaluation
-                if piece.color == self.color:
-                    if piece.notation == 'p':
-                        # Bonus for pawns controlling the center
-                        score += 0.1 * (3 - abs(3 - tile.x))
-                    # elif piece.notation == 'k':
-                    #     # Penalty for the king being exposed
-                    #     if self.is_king_in_check(self.color, board):
-                    #         score -= 0.5
+        #Evaluate pieces and positions
+        for piece in ops:
+            piece_value = 20 if piece.notation == 'k' else 10
+            score -= piece_value
+
+        for piece in mine:
+            piece_value = 20 if piece.notation == 'k' else 10
+            score += piece_value
+
+            if piece.notation == 'p':
+                if self.color=='red':
+                    score += 1 * (7 - piece.y)  # Move pawns closer to the top for red
+                    if piece.y==7 and self.numMoves>10:
+                        score -= 10
                 else:
-                    if piece.notation == 'p':
-                        # Bonus for opponent's pawns controlling the center
-                        score -= 0.1 * (3 - abs(3 - tile.x))
-                    # elif piece.notation == 'k':
-                    #     # Penalty for the opponent's king being exposed
-                    #     if board.is_king_in_check(self.get_opponent_color()):
-                    #         score += 0.5
+                    score += 1 * piece.y # Move pawns closer to the bottom for black
+                    if piece.y==0 and self.numMoves>10:
+                        score -= 10
+                
+                # Bonus for pawns controlling the center
+                score += 1 * (3 - abs(3 - tile.x))
+            elif piece.notation == 'k':
+                # Move towards the closest opponent piece
+                closest_opponent_distance = float('inf')
+                for opponent_piece in ops:
+                    distance_to_opponent = self.distance(piece, opponent_piece)
+                    closest_opponent_distance = min(closest_opponent_distance, distance_to_opponent)
+                score -= closest_opponent_distance
+
+        for opponent_piece in ops:
+            for self_piece in mine:
+                if self.is_neighbor(self_piece, opponent_piece):
+                    if self_piece.notation == 'p':
+                        score -= 20
+                    else:
+                        score -= 50
 
         # Evaluate pawn structure
-        for x in range(1, 7):
-            for y in range(1, 7):
+        for x in range(0, 7):
+            for y in range(0, 7):
                 tile = board.get_tile_from_pos((x,y))
-                if tile.occupying_piece and tile.occupying_piece.notation == 'p':
+                if tile.occupying_piece and tile.occupying_piece.notation == 'p' and tile.occupying_piece.color == self.color:
                     # Bonus for connected pawns
-                    connected_pawns = self.count_connected_pawns(board, x, y)
-                    score += 0.2 * connected_pawns
+                    connected_pawns = self.count_connected_pawns(board, x, y, self.color)
+                    score += 0.1 * connected_pawns
 
+        print(score)
         return score
     
-    # def is_king_in_check(self, color, board):
-    #     king_position = None
-
-    #     # Find the position of the king of the specified color
-    #     for tile in board.tile_list:
-    #         piece = tile.occupying_piece
-    #         if piece and piece.notation == 'k' and piece.color == color:
-    #             king_position = (tile.x, tile.y)
-    #             break
-
-    #     if king_position is None:
-    #         # King not found, something is wrong with the board state
-    #         raise ValueError("King not found on the board")
-
-    #     # Check if any opponent's piece threatens the king
-    #     for tile in board.tile_list:
-    #         piece = tile.occupying_piece
-    #         if piece and piece.color != color:
-    #             valid_moves = self.get_valid_moves(tile.x, tile.y, board)
-    #             if king_position in valid_moves:
-    #                 return True
-
-    #     return False
+    def distance(self, piece1, piece2):
+        return abs(piece1.x - piece2.x) + abs(piece1.y - piece2.y)
+    
+    def is_neighbor(self, piece1, piece2):
+        positions = []
+        positions.append((piece2.x + 1, piece2.y + 1))
+        positions.append((piece2.x + 1, piece2.y - 1))
+        positions.append((piece2.x - 1, piece2.y + 1))
+        positions.append((piece2.x - 1, piece2.y - 1))
+        return piece1.pos in positions
 
 
-    def count_connected_pawns(self, board, x, y):
+    def count_connected_pawns(self, board, x, y, color):
         count = 0
         for dx in [-1, 0, 1]:
             for dy in [-1, 0, 1]:
@@ -159,7 +168,7 @@ class AIPlayer:
                 nx, ny = x + dx, y + dy
                 if 1 <= nx <= 6 and 1 <= ny <= 6:
                     neighbor_tile = board.get_tile_from_pos((nx,ny))
-                    if neighbor_tile.occupying_piece and neighbor_tile.occupying_piece.notation == 'p':
+                    if neighbor_tile.occupying_piece and neighbor_tile.occupying_piece.notation == 'p' and neighbor_tile.occupying_piece.color == color:
                         count += 1
         return count
 
