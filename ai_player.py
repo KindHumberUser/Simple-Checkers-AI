@@ -11,7 +11,11 @@ class AIPlayer:
         elif self.difficulty == 'intermediate':
             return self.select_move_intermediate(board)
         elif self.difficulty == 'advanced':
-            return self.select_move_advanced(board)
+            move = self.select_move_advanced(board)
+            if move==None:
+                #Just return a random move
+                return self.select_move_beginner(board)
+            return move
 
     def select_move_beginner(self, board):
         # Select a random valid move
@@ -86,7 +90,7 @@ class AIPlayer:
         for tile in board.tile_list:
             piece = tile.occupying_piece
             if piece:
-                piece_value = 1.5 if piece.notation == 'k' else 1
+                piece_value = 2 if piece.notation == 'k' else 1
                 if piece.color == self.color:
                     score += piece_value
                 else:
